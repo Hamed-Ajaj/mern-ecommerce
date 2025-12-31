@@ -1,11 +1,10 @@
 import { Response, Router } from "express";
 import validate from "express-zod-safe"
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken"
 import { loginSchema, signupSchema } from "../schemas/auth.schema";
 import { db } from "../config/db";
 import { User } from "../types/user";
-import { RowDataPacket } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { StatusCodes } from "http-status-codes";
 import { issueAuthCookie } from "../utils/cookies-helper";
 import { authMiddleware } from "../middlewares/auth";
@@ -60,22 +59,22 @@ router.post("/signup", validate({ body: signupSchema }), async (req, res) => {
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 12);
-    const [row] = await db.query(`INSERT INTO users (username,email,password) VALUES (?, ?, ?)`, [username, email, hashedPassword])
+    const [row] = await db.query<ResultSetHeader>(`INSERT INTO users (username,email,password) VALUES (?, ?, ?)`, [username, email, hashedPassword])
 
+    issueAuthCookie(res, row.insertId)
     res.status(StatusCodes.CREATED).json({ message: "User created" });
-    issueAuthCookie(res, user[0].id)
   } catch (error) {
-    // if (error instanceof Error) {
-    //   if (error.code === "ER_DUP_ENTRY") {
-    //     return res.status(409).json({ message: "User already exists" });
-    //   }
-    // }
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       message: "Failed to sign up",
       success: false
     })
   }
 })
+
+router.post("/logout", (req, res) => {
+  res.clearCookie("access_token");
+  res.sendStatus(204);
+});
 
 router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
 
@@ -84,13 +83,20 @@ router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
   }
 
   const userId = req.user.userId;
+  try {
+    const [rows] = await db.query<(User & RowDataPacket)[]>(
+      "SELECT id, email, username FROM users WHERE id = ?",
+      [userId]
+    );
 
-  const [rows] = await db.query<(User & RowDataPacket)[]>(
-    "SELECT id, email, username FROM users WHERE id = ?",
-    [userId]
-  );
+    res.json(rows[0]);
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: "Failed to get user",
+      success: false
+    })
+  }
 
-  res.json(rows[0]);
 });
 
 export default router

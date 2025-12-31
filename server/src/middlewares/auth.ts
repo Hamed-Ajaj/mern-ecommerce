@@ -1,5 +1,5 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
+import { Response, NextFunction } from "express";
 import { AuthRequest } from "../types/auth";
 
 export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction) {
