@@ -1,19 +1,15 @@
-import { Response, Router } from "express";
-import validate from "express-zod-safe"
-import bcrypt from "bcrypt";
-import { loginSchema, signupSchema } from "../schemas/auth.schema";
-import { db } from "../config/db";
-import { User } from "../types/user";
+import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { StatusCodes } from "http-status-codes";
+import { db } from "../config/db";
 import { issueAuthCookie } from "../utils/cookies-helper";
-import { authMiddleware } from "../middlewares/auth";
+import { StatusCodes } from "http-status-codes";
+import bcrypt from "bcrypt"
+import { User } from "../types/user";
 import { AuthRequest } from "../types/auth";
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
-const router = Router()
-
-router.post("/login", validate({ body: loginSchema }), async (req, res) => {
+export const loginController = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
@@ -45,9 +41,8 @@ router.post("/login", validate({ body: loginSchema }), async (req, res) => {
       success: false,
     });
   }
-})
-
-router.post("/signup", validate({ body: signupSchema }), async (req, res) => {
+}
+export const signUpController = async (req: Request, res: Response) => {
   const { email, password, username } = req.body
 
   try {
@@ -69,14 +64,14 @@ router.post("/signup", validate({ body: signupSchema }), async (req, res) => {
       success: false
     })
   }
-})
+}
 
-router.post("/logout", (req, res) => {
+export const logoutController = (req: Request, res: Response) => {
   res.clearCookie("access_token");
   res.sendStatus(204);
-});
+}
 
-router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
+export const profileController = async (req: AuthRequest, res: Response) => {
 
   if (!req.user) {
     return res.sendStatus(401);
@@ -97,6 +92,5 @@ router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
     })
   }
 
-});
+}
 
-export default router
