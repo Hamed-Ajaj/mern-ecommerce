@@ -1,24 +1,38 @@
+import { Route, Routes } from 'react-router-dom'
+import Home from './pages/home'
+import Products from './pages/products'
+import Login from './pages/login'
+import Cart from './pages/cart'
+import { useEffect } from 'react'
+import { useAuthStore } from './store/useAuthStore'
+
 function App() {
+  const setUser = useAuthStore((state) => state.setUser)
+  useEffect(() => {
+    fetch("http://localhost:5000/api/auth/me", {
+      credentials: "include",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error()
+        return res.json()
+      })
+      .then((user) => {
+        setUser(user)
+      })
+      .catch(() => {
+        setUser(null)
+      })
+  }, [])
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center gap-6 px-6 text-center">
-        <span className="rounded-full border border-slate-800 bg-slate-900/60 px-4 py-1 text-sm uppercase tracking-[0.2em] text-slate-300">
-          MERN Stacker
-        </span>
-        <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-          React + Vite + Express, now with Tailwind
-        </h1>
-        <p className="text-pretty text-lg text-slate-300">
-          Start building fast with a styled baseline and utility-first CSS baked in.
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-slate-300">
-          <span className="rounded-md border border-slate-800 px-3 py-1">pnpm dev</span>
-          <span className="rounded-md border border-slate-800 px-3 py-1">npm run dev</span>
-          <span className="rounded-md border border-slate-800 px-3 py-1">yarn dev</span>
-        </div>
-      </div>
-    </div>
-  );
+    <main className="min-h-full bg-[#f8f4ef] text-stone-900">
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/cart" element={<Cart />} />
+      </Routes>
+    </main>
+  )
 }
 
-export default App;
+export default App
