@@ -6,7 +6,7 @@ import { useCartStore } from '../store/useCartStore'
 
 const Navbar = () => {
   const cart = useCartStore((state) => state.cart)
-  const user = useAuthStore((state) => state.user)
+  const { user, loading } = useAuthStore()
 
 
   const initials = user?.username
@@ -46,7 +46,7 @@ const Navbar = () => {
               </Link>
             </Button>
           )}
-          {user ? (
+          {loading ? (<>loading</>) : user ? (
             <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5">
               <span className="grid h-8 w-8 place-items-center rounded-full bg-stone-900 text-xs font-semibold text-white">
                 {initials || 'U'}

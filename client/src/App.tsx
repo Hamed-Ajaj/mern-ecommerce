@@ -7,7 +7,7 @@ import { useEffect } from 'react'
 import { useAuthStore } from './store/useAuthStore'
 
 function App() {
-  const setUser = useAuthStore((state) => state.setUser)
+  const { setUser, setLoading } = useAuthStore()
   useEffect(() => {
     fetch("http://localhost:5000/api/auth/me", {
       credentials: "include",
@@ -21,6 +21,9 @@ function App() {
       })
       .catch(() => {
         setUser(null)
+      })
+      .finally(() => {
+        setLoading(false) // 🔑 auth resolved
       })
   }, [])
   return (
