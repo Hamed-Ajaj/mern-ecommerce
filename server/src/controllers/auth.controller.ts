@@ -66,7 +66,7 @@ export const signUpController = async (req: Request, res: Response) => {
   }
 }
 
-export const logoutController = (req: Request, res: Response) => {
+export const logoutController = (_: Request, res: Response) => {
   res.clearCookie("access_token");
   res.sendStatus(204);
 }

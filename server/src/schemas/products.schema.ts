@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const createProductSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  title: z.string().min(1, "Name is required"),
   price: z.coerce.number().positive("Price must be positive"),
   description: z.string().optional(),
   image_url: z.url().optional()
@@ -9,7 +9,7 @@ export const createProductSchema = z.object({
 
 
 export const updateProductSchema = z.object({
-  name: z.string().min(3),
+  title: z.string().min(3),
   description: z
     .string()
     .min(20)
@@ -36,4 +36,8 @@ export const querySchema = z.object({
     .enum(["asc", "desc"])
     .optional()
     .default("desc"),
+})
+
+export const paramsSchema = z.object({
+  id: z.coerce.number()
 })

@@ -1,19 +1,17 @@
 import { Router } from "express";
-import z from "zod";
 import validate from "express-zod-safe";
-import { querySchema } from "../schemas/products.schema";
-import { allProductsController, createProductController, productController } from "../controllers/products.controller";
+import { createProductSchema, paramsSchema, querySchema, updateProductSchema } from "../schemas/products.schema";
+import { allProductsController, createProductController, deleteProductController, productController, updateProductController } from "../controllers/products.controller";
 import { authMiddleware } from "../middlewares/auth.middleware";
 
 const router = Router()
 
 router.get('/', validate({ query: querySchema }), allProductsController)
-
 router.get('/:id', validate({
-  params: z.object({
-    id: z.coerce.number()
-  })
+  params: paramsSchema
 }), productController)
-router.post("/", authMiddleware, createProductController)
+router.post("/", authMiddleware, validate({ body: createProductSchema }), createProductController)
+router.put("/:id", authMiddleware, updateProductController)
+router.delete("/:id", authMiddleware, deleteProductController)
 
 export default router
