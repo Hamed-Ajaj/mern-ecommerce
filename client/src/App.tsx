@@ -5,6 +5,7 @@ import Login from './pages/login'
 import Cart from './pages/cart'
 import { useEffect } from 'react'
 import { useAuthStore } from './store/useAuthStore'
+import SignUpPage from './pages/sign-up'
 
 function App() {
   const { setUser, setLoading } = useAuthStore()
@@ -32,6 +33,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/sign-up" element={<SignUpPage />} />
         <Route path="/cart" element={<Cart />} />
       </Routes>
     </main>
