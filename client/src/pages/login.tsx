@@ -46,9 +46,6 @@ const Login = () => {
       }
 
       const user = await meRes.json()
-
-      console.log(user)
-      // 3️⃣ Store user in Zustand
       setUser(user)
 
       toast.success(`Welcome back ${user.username}`)
@@ -60,8 +57,26 @@ const Login = () => {
     }
   }
 
+  const handleLogout = async () => {
+
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      })
+      if (res.ok) {
+        setUser(null)
+        toast.success("Logged out successfully")
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unexpected error"
+      )
+    }
+  }
+
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-96px)] max-w-6xl items-center justify-center px-6 py-16">
+    <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-6 py-10">
       <Card className="w-full max-w-lg rounded-[28px] border-black/10 bg-white/90 shadow-[0_25px_60px_rgba(0,0,0,0.08)]">
         <CardHeader className="space-y-2 px-8">
           <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
@@ -93,9 +108,7 @@ const Login = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => {
-                      setUser(null)
-                    }}
+                    onClick={handleLogout}
                     className="rounded-full border-black/10"
                   >
                     Sign out
@@ -140,6 +153,10 @@ const Login = () => {
             </Button>
             <p className="text-center text-xs text-stone-500">
               By continuing you agree to receive the studio drop notes.
+            </p>
+
+            <p className="text-center text-xs text-stone-500">
+              Don't have and account? <Link className='underline' to="/sign-up">Sign up</Link>
             </p>
           </form>
         )}
