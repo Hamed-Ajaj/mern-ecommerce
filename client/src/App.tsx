@@ -6,6 +6,7 @@ import Cart from './pages/cart'
 import { useEffect } from 'react'
 import { useAuthStore } from './store/useAuthStore'
 import SignUpPage from './pages/sign-up'
+import Footer from './components/footer'
 
 function App() {
   const { setUser, setLoading } = useAuthStore()
@@ -28,14 +29,17 @@ function App() {
       })
   }, [])
   return (
-    <main className="min-h-full bg-[#f8f4ef] text-stone-900">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/sign-up" element={<SignUpPage />} />
-        <Route path="/cart" element={<Cart />} />
-      </Routes>
+    <main className="flex min-h-screen flex-col bg-[#f8f4ef] text-stone-900">
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/sign-up" element={<SignUpPage />} />
+          <Route path="/cart" element={<Cart />} />
+        </Routes>
+      </div>
+      <Footer />
     </main>
   )
 }
