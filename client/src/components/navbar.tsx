@@ -1,12 +1,33 @@
-import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from './ui/button'
 import { useAuthStore } from '../store/useAuthStore'
 import { useCartStore } from '../store/useCartStore'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
+import { toast } from 'sonner'
 
 const Navbar = () => {
   const cart = useCartStore((state) => state.cart)
-  const { user, loading } = useAuthStore()
+  const { user, loading, setUser } = useAuthStore()
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+      if (res.ok) {
+        setUser(null)
+        toast.success('Logged out successfully')
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Unexpected error')
+    }
+  }
 
 
   const initials = user?.username
@@ -47,12 +68,33 @@ const Navbar = () => {
             </Button>
           )}
           {loading ? (<>loading</>) : user ? (
-            <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-stone-900 text-xs font-semibold text-white">
-                {initials || 'U'}
-              </span>
-              <span className="hidden text-sm sm:block">{user.username}</span>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5 transition hover:border-black/30"
+                >
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-stone-900 text-xs font-semibold text-white">
+                    {initials || 'U'}
+                  </span>
+                  <span className="hidden text-sm sm:block">{user.username}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={(event) => {
+                    event.preventDefault()
+                    handleLogout()
+                  }}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button
               asChild

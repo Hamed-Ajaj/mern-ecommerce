@@ -80,7 +80,7 @@ export const profileController = async (req: AuthRequest, res: Response) => {
   const userId = req.user.userId;
   try {
     const [rows] = await db.query<(User & RowDataPacket)[]>(
-      "SELECT id, email, username FROM users WHERE id = ?",
+      "SELECT id, email, username, role FROM users WHERE id = ?",
       [userId]
     );
 

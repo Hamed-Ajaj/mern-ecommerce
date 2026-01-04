@@ -1,17 +1,17 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from '../components/ui/button'
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../components/ui/card'
+} from '../../components/ui/card'
 import { toast } from "sonner"
-import { Input } from '../components/ui/input'
-import { Label } from '../components/ui/label'
-import { useAuthStore } from '../store/useAuthStore'
+import { Input } from '../../components/ui/input'
+import { Label } from '../../components/ui/label'
+import { useAuthStore } from '../../store/useAuthStore'
+import { Button } from '@/components/ui/button'
 
 const Login = () => {
   const navigate = useNavigate()

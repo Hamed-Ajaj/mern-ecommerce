@@ -80,13 +80,13 @@ const Home = () => {
               <span className="font-medium text-stone-800">
                 Members earn 12% back
               </span>
-            <Button
-              asChild
-              variant="link"
-              className="h-auto px-0 text-sm font-semibold text-stone-500"
-            >
-              <Link to="/login">Join now</Link>
-            </Button>
+              <Button
+                asChild
+                variant="link"
+                className="h-auto px-0 text-sm font-semibold text-stone-500"
+              >
+                <Link to="/login">Join now</Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -188,7 +188,7 @@ const Home = () => {
               />
               <Button
                 type="button"
-                className="h-11 rounded-full border border-white bg-white px-6 text-sm font-semibold text-black transition hover:-translate-y-0.5"
+                className="h-11 rounded-full border border-white bg-white px-6 text-sm font-semibold text-black transition hover:-translate-y-0.5 hover:bg-white/90 cursor-pointer"
               >
                 Join the list
               </Button>

@@ -1,51 +1,33 @@
-import { useMemo } from 'react'
-import { useAuthStore } from '../store/useAuthStore'
-import { useCartStore } from '../store/useCartStore'
+import { useEffect, useState } from 'react'
 import type { Product } from '../types/product'
 import ProductCard from '@/components/product-card'
+import { toast } from 'sonner'
 
 const Products = () => {
-  const products = useMemo<Product[]>(
-    () => [
-      {
-        id: 1,
-        title: 'Amber Weave Throw',
-        description: 'Lightweight knit with warm tonal texture.',
-        price: 68,
-      },
-      {
-        id: 2,
-        title: 'Marble Ridge Tray',
-        description: 'A sculpted tray for daily rituals.',
-        price: 54,
-      },
-      {
-        id: 3,
-        title: 'Frosted Glass Vase',
-        description: 'Matte finish with a smoke-grey tint.',
-        price: 72,
-      },
-      {
-        id: 4,
-        title: 'Linen Halo Cushion',
-        description: 'Soft neutral cushion with hand-tied edge.',
-        price: 48,
-      },
-      {
-        id: 5,
-        title: 'Oakline Candle Pair',
-        description: 'Warm cedar blend in amber glass.',
-        price: 32,
-      },
-      {
-        id: 6,
-        title: 'Woven Arc Basket',
-        description: 'Structured storage with woven depth.',
-        price: 59,
-      },
-    ],
-    [],
-  )
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(false)
+  const fetchProducts = async () => {
+    try {
+      setLoading(true)
+      const res = await fetch("http://localhost:5000/api/products")
+      const data = await res.json()
+      if (res.ok) {
+        setProducts(data.products)
+        setLoading(false)
+      }
+      console.log(data.products)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unexpected Error")
+      setLoading(false)
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
 
   return (
     <div className="relative overflow-hidden">
@@ -70,8 +52,8 @@ const Products = () => {
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => (
-          <ProductCard product={product} />
+        {products?.map((product) => (
+          <ProductCard product={product} key={product.id} />
         ))}
       </section>
     </div>

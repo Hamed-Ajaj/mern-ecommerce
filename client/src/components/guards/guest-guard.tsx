@@ -9,7 +9,7 @@ type GuestGuardProps = {
 const GuestGuard = ({ children }: GuestGuardProps) => {
   const { user, loading } = useAuthStore()
 
-  if (loading) return null
+  if (loading) return <h1>loading...</h1>
 
   if (user) {
     return <Navigate to="/" replace />

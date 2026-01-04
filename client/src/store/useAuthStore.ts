@@ -3,6 +3,7 @@ import { create } from 'zustand'
 type User = {
   username: string
   email?: string
+  role?: string
 }
 
 type AuthStore = {

@@ -2,14 +2,56 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useState, type FormEvent } from "react";
+import { toast } from "sonner"
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
+
+  const setUser = useAuthStore((state) => state.setUser)
+  const navigate = useNavigate()
+
   const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const handleSubmit = () => { }
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+
+    event.preventDefault()
+
+    try {
+      // 1️⃣ Login (sets cookie)
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      })
+
+      if (!res.ok) {
+        throw new Error("Invalid credentials")
+      }
+
+      // 2️⃣ Fetch current user
+      const meRes = await fetch("http://localhost:5000/api/auth/me", {
+        credentials: "include",
+      })
+
+      if (!meRes.ok) {
+        throw new Error("Failed to fetch user")
+      }
+
+      const user = await meRes.json()
+      setUser(user)
+
+      toast.success(`Account ${user.username} Created`)
+      navigate("/")
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unexpected error"
+      )
+    }
+  }
   return (
     <div className="mx-auto flex min-h-[calc(100vh-96px)] max-w-6xl items-center justify-center px-6 py-16">
 
@@ -77,7 +119,7 @@ const SignUpPage = () => {
           </p>
 
           <p className="text-center text-xs text-stone-500">
-            Don't have and account? <Link className='underline' to="/sign-up">Sign up</Link>
+            Already have an account? <Link className='underline' to="/login">Login</Link>
           </p>
         </form>
       </Card>
