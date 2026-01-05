@@ -9,7 +9,13 @@ import SignUpPage from './pages/auth/sign-up'
 import Footer from './components/footer'
 import GuestGuard from './components/guards/guest-guard'
 import AuthGuard from './components/guards/auth-guard'
+import AdminGuard from './components/guards/admin-guard'
 import ProfilePage from './pages/auth/profile'
+import AdminDashboard from './pages/admin'
+import AdminLayout from './pages/admin/layout'
+import AdminProducts from './pages/admin/products'
+import CreateProduct from './pages/admin/products/create'
+import EditProduct from './pages/admin/products/edit/[id]'
 
 function App() {
   const { user, setUser, setLoading } = useAuthStore()
@@ -43,6 +49,12 @@ function App() {
           <Route path="/sign-up" element={<GuestGuard><SignUpPage /></GuestGuard>} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
+          <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="products/create" element={<CreateProduct />} />
+            <Route path="products/edit/:id" element={<EditProduct />} />
+          </Route>
         </Routes>
       </div>
       <Footer />
