@@ -56,17 +56,15 @@ const Navbar = () => {
           <Button asChild variant="outline" className="rounded-full border-black/10">
             <Link to="/products">Products</Link>
           </Button>
-          {user && (
-            <Button asChild className='relative cursor-pointer rounded-full' variant={'default'}>
-              <Link to="/cart">Cart
-                {cart.length > 0 && (
-                  <span className="absolute -top-2 -right-1 grid h-5 w-5 place-items-center rounded-full bg-white text-[11px] font-semibold text-black">
-                    {cart.length}
-                  </span>
-                )}
-              </Link>
-            </Button>
-          )}
+          <Button asChild className='relative cursor-pointer rounded-full' variant={'default'}>
+            <Link to="/cart">Cart
+              {cart.length > 0 && (
+                <span className="absolute -top-2 -right-1 grid h-5 w-5 place-items-center rounded-full bg-white text-[11px] font-semibold text-black">
+                  {cart.length}
+                </span>
+              )}
+            </Link>
+          </Button>
           {loading ? (<>loading</>) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

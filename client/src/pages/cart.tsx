@@ -5,6 +5,13 @@ import { useCartStore } from '../store/useCartStore'
 const Cart = () => {
   const cart = useCartStore((state) => state.cart)
   const clearCart = useCartStore((state) => state.clearCart)
+  const increaseQuantity = useCartStore((state) => state.increaseQuantity)
+  const decreaseQuantity = useCartStore((state) => state.decreaseQuantity)
+  const removeFromCart = useCartStore((state) => state.removeFromCart)
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  )
 
   return (
     <div className="mx-auto max-w-6xl px-6 pb-24 pt-12">
@@ -49,18 +56,59 @@ const Cart = () => {
                 </p>
                 <p className="text-xs text-stone-500">{item.description}</p>
               </div>
-              <span className="text-sm font-semibold text-stone-800">
-                ${item.price}
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-semibold text-stone-800">
+                  ${Number(item.price) * item.quantity}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => decreaseQuantity(item.id)}
+                    className="h-8 w-8 rounded-full border-black/20 p-0 text-sm font-semibold text-stone-700 hover:border-black"
+                  >
+                    -
+                  </Button>
+                  <span className="min-w-[2ch] text-center text-sm font-semibold text-stone-800">
+                    {item.quantity}
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => increaseQuantity(item.id)}
+                    className="h-8 w-8 rounded-full border-black/20 p-0 text-sm font-semibold text-stone-700 hover:border-black"
+                  >
+                    +
+                  </Button>
+                </div>
+                <Button
+                  variant="ghost"
+                  onClick={() => removeFromCart(item.id)}
+                  className="rounded-full cursor-pointer px-3 py-1 text-xs font-semibold text-stone-600 hover:text-stone-900"
+                >
+                  Remove
+                </Button>
+              </div>
             </div>
           ))}
-          <Button
-            variant="outline"
-            onClick={clearCart}
-            className="rounded-full border-black/10 bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 transition hover:border-black"
-          >
-            Clear cart
-          </Button>
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-black/10 bg-white/80 px-5 py-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-stone-500">
+                Total
+              </p>
+              <p className="font-display mt-2 text-3xl text-stone-900">
+                ${total.toFixed(2)}
+              </p>
+              <p className="mt-1 text-xs text-stone-500">
+                Shipping and taxes calculated at checkout.
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={clearCart}
+              className="rounded-full border-black/10 bg-white px-5 py-2.5 text-sm font-semibold text-stone-700 transition hover:border-black"
+            >
+              Clear cart
+            </Button>
+          </div>
         </div>
       )}
     </div>

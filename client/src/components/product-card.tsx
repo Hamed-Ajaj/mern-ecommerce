@@ -1,13 +1,11 @@
-import type { Product } from "@/types/product";
-import { Card, CardContent, CardFooter } from "./ui/card";
-import { Button } from "./ui/button";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useCartStore } from "@/store/useCartStore";
-import { toast } from "sonner"
+import type { Product } from '@/types/product'
+import { Card, CardContent, CardFooter } from './ui/card'
+import { Button } from './ui/button'
+import { useCartStore } from '@/store/useCartStore'
+import { toast } from 'sonner'
 
 const ProductCard = ({ product }: { product: Product }) => {
   const addToCart = useCartStore((state) => state.addToCart)
-  const user = useAuthStore((state) => state.user)
   return (
     <Card
       key={product.id}
@@ -34,10 +32,6 @@ const ProductCard = ({ product }: { product: Product }) => {
       <CardFooter className="px-5">
         <Button
           onClick={() => {
-            if (!user) {
-              toast.error('Sign in to add items to your cart.')
-              return
-            }
             addToCart(product)
             toast.success(`${product.title} added to your cart.`)
           }}
@@ -49,4 +43,4 @@ const ProductCard = ({ product }: { product: Product }) => {
     </Card>
   )
 }
-export default ProductCard;
+export default ProductCard
