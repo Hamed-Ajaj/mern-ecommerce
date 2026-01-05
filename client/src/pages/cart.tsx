@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import Loading from '../components/loading'
 import { Button } from '../components/ui/button'
 import { useCartStore } from '../store/useCartStore'
 
 const Cart = () => {
   const cart = useCartStore((state) => state.cart)
+  const hasHydrated = useCartStore((state) => state.hasHydrated)
   const clearCart = useCartStore((state) => state.clearCart)
   const increaseQuantity = useCartStore((state) => state.increaseQuantity)
   const decreaseQuantity = useCartStore((state) => state.decreaseQuantity)
@@ -38,10 +40,16 @@ const Cart = () => {
       </div>
 
       {cart.length === 0 ? (
-        <div className="mt-12 rounded-[24px] border border-black/10 bg-white/80 p-8 text-center">
-          <p className="text-sm text-stone-600">
-            Start with our latest drop and build your list.
-          </p>
+        <div className="mt-12">
+          {!hasHydrated ? (
+            <Loading label="Loading your cart" />
+          ) : (
+            <div className="rounded-[24px] border border-black/10 bg-white/80 p-8 text-center">
+              <p className="text-sm text-stone-600">
+                Start with our latest drop and build your list.
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="mt-10 space-y-4">

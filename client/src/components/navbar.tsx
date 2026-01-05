@@ -1,5 +1,7 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Button } from './ui/button'
+import { Input } from './ui/input'
 import { useAuthStore } from '../store/useAuthStore'
 import { useCartStore } from '../store/useCartStore'
 import {
@@ -13,6 +15,14 @@ import { toast } from 'sonner'
 const Navbar = () => {
   const cart = useCartStore((state) => state.cart)
   const { user, loading, setUser } = useAuthStore()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const searchParam = searchParams.get('search') ?? ''
+  const [searchValue, setSearchValue] = useState(searchParam)
+
+  useEffect(() => {
+    setSearchValue(searchParam)
+  }, [searchParam])
 
   const handleLogout = async () => {
     try {
@@ -29,6 +39,14 @@ const Navbar = () => {
     }
   }
 
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const next = searchValue.trim()
+    const query = next ? `?search=${encodeURIComponent(next)}` : ''
+    if (query.length > 0) {
+      navigate(`/products${query}`)
+    }
+  }
 
   const initials = user?.username
     ?.split(' ')
@@ -53,6 +71,25 @@ const Navbar = () => {
         </Link>
 
         <div className="flex items-center gap-4 text-sm">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5"
+          >
+            <Input
+              type="search"
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
+              placeholder="Search products"
+              className="h-8 w-28 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0 sm:w-40"
+            />
+            <Button
+              type="submit"
+              variant="ghost"
+              className="h-8 rounded-full px-3 text-xs font-semibold text-stone-600 hover:text-stone-900"
+            >
+              Search
+            </Button>
+          </form>
           <Button asChild variant="outline" className="rounded-full border-black/10">
             <Link to="/products">Products</Link>
           </Button>

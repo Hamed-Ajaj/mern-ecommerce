@@ -1,33 +1,52 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import type { Product } from '../types/product'
 import ProductCard from '@/components/product-card'
+import Loading from '@/components/loading'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 
 const Products = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const searchParam = searchParams.get('search') ?? ''
+  const orderParam = searchParams.get('order') ?? ''
+  const sortParam = searchParams.get('sort') ?? ''
+  console.log(orderParam, sortParam)
+  const [searchValue, setSearchValue] = useState(searchParam)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
-  const fetchProducts = async () => {
+
+  useEffect(() => {
+    setSearchValue(searchParam)
+  }, [searchParam])
+
+  const fetchProducts = async (search: string) => {
     try {
       setLoading(true)
-      const res = await fetch("http://localhost:5000/api/products")
+      const query = search ? `?search=${encodeURIComponent(search)}` : ''
+      const res = await fetch(`http://localhost:5000/api/products${query}`)
       const data = await res.json()
       if (res.ok) {
         setProducts(data.products)
-        setLoading(false)
       }
-      console.log(data.products)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Unexpected Error")
+      toast.error(error instanceof Error ? error.message : 'Unexpected Error')
       setLoading(false)
-    }
-    finally {
+    } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    fetchProducts()
-  }, [])
+    fetchProducts(searchParam)
+  }, [searchParam])
+
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const next = searchValue.trim()
+    setSearchParams(next ? { search: next } : {})
+  }
 
   return (
     <div className="relative overflow-hidden">
@@ -45,17 +64,44 @@ const Products = () => {
               and warmth to modern spaces.
             </p>
           </div>
-          <div className="rounded-full border border-black/10 bg-white px-5 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
-            Limited drop
+          <div className="flex flex-col gap-3 sm:items-end">
+            <div className="rounded-full border border-black/10 bg-white px-5 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
+              Limited drop
+            </div>
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5"
+            >
+              <Input
+                type="search"
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                placeholder="Search products"
+                className="h-9 w-56 border-0 bg-transparent px-0 text-sm shadow-none focus-visible:ring-0"
+              />
+              <Button
+                type="submit"
+                variant="ghost"
+                className="h-8 rounded-full px-3 text-xs font-semibold text-stone-600 hover:text-stone-900"
+              >
+                Search
+              </Button>
+            </form>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
-        {products?.map((product) => (
-          <ProductCard product={product} key={product.id} />
-        ))}
-      </section>
+      {loading ? (
+        <section className="mx-auto max-w-6xl px-6 pb-24">
+          <Loading label="Loading products" />
+        </section>
+      ) : (
+        <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-24 sm:grid-cols-2 lg:grid-cols-3">
+          {products?.map((product) => (
+            <ProductCard product={product} key={product.id} />
+          ))}
+        </section>
+      )}
     </div>
   )
 }

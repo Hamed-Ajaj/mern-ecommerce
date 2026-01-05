@@ -1,28 +1,32 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { Product } from "@/types/product";
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import type { Product } from '@/types/product'
 
 type CartItem = Product & {
-  quantity: number;
-};
+  quantity: number
+}
 
 type CartStore = {
-  cart: CartItem[];
-  addToCart: (product: Product) => void;
-  increaseQuantity: (id: number) => void;
-  decreaseQuantity: (id: number) => void;
-  removeFromCart: (id: number) => void;
-  clearCart: () => void;
-};
+  cart: CartItem[]
+  hasHydrated: boolean
+  setHasHydrated: (value: boolean) => void
+  addToCart: (product: Product) => void
+  increaseQuantity: (id: number) => void
+  decreaseQuantity: (id: number) => void
+  removeFromCart: (id: number) => void
+  clearCart: () => void
+}
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set) => ({
       cart: [],
+      hasHydrated: false,
+      setHasHydrated: (value) => set({ hasHydrated: value }),
 
       addToCart: (product) =>
         set((state) => {
-          const existing = state.cart.find((p) => p.id === product.id);
+          const existing = state.cart.find((p) => p.id === product.id)
 
           if (existing) {
             return {
@@ -31,12 +35,12 @@ export const useCartStore = create<CartStore>()(
                   ? { ...p, quantity: p.quantity + 1 }
                   : p
               ),
-            };
+            }
           }
 
           return {
             cart: [...state.cart, { ...product, quantity: 1 }],
-          };
+          }
         }),
 
       increaseQuantity: (id) =>
@@ -63,7 +67,10 @@ export const useCartStore = create<CartStore>()(
       clearCart: () => set({ cart: [] }),
     }),
     {
-      name: "guest-cart", // localStorage key
+      name: 'guest-cart', // localStorage key
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
-);
+)
