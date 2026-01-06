@@ -8,8 +8,11 @@ type CartItem = Product & {
 
 type CartStore = {
   cart: CartItem[]
+  cartsByUser: Record<string, CartItem[]>
+  activeUserKey: string
   hasHydrated: boolean
   setHasHydrated: (value: boolean) => void
+  setActiveUserKey: (key: string) => void
   addToCart: (product: Product) => void
   increaseQuantity: (id: number) => void
   decreaseQuantity: (id: number) => void
@@ -21,55 +24,102 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set) => ({
       cart: [],
+      cartsByUser: {},
+      activeUserKey: 'guest',
       hasHydrated: false,
       setHasHydrated: (value) => set({ hasHydrated: value }),
+      setActiveUserKey: (key) =>
+        set((state) => ({
+          activeUserKey: key,
+          cart: state.cartsByUser[key] || [],
+        })),
 
       addToCart: (product) =>
         set((state) => {
           const existing = state.cart.find((p) => p.id === product.id)
 
           if (existing) {
-            return {
-              cart: state.cart.map((p) =>
+            const cart = state.cart.map((p) =>
                 p.id === product.id
                   ? { ...p, quantity: p.quantity + 1 }
                   : p
-              ),
+              )
+            return {
+              cart,
+              cartsByUser: {
+                ...state.cartsByUser,
+                [state.activeUserKey]: cart,
+              },
             }
           }
 
+          const cart = [...state.cart, { ...product, quantity: 1 }]
           return {
-            cart: [...state.cart, { ...product, quantity: 1 }],
+            cart,
+            cartsByUser: {
+              ...state.cartsByUser,
+              [state.activeUserKey]: cart,
+            },
           }
         }),
 
       increaseQuantity: (id) =>
-        set((state) => ({
-          cart: state.cart.map((p) =>
+        set((state) => {
+          const cart = state.cart.map((p) =>
             p.id === id ? { ...p, quantity: p.quantity + 1 } : p
-          ),
-        })),
+          )
+          return {
+            cart,
+            cartsByUser: {
+              ...state.cartsByUser,
+              [state.activeUserKey]: cart,
+            },
+          }
+        }),
 
       decreaseQuantity: (id) =>
-        set((state) => ({
-          cart: state.cart
+        set((state) => {
+          const cart = state.cart
             .map((p) =>
               p.id === id ? { ...p, quantity: p.quantity - 1 } : p
             )
-            .filter((p) => p.quantity > 0),
-        })),
+            .filter((p) => p.quantity > 0)
+          return {
+            cart,
+            cartsByUser: {
+              ...state.cartsByUser,
+              [state.activeUserKey]: cart,
+            },
+          }
+        }),
 
       removeFromCart: (id) =>
-        set((state) => ({
-          cart: state.cart.filter((p) => p.id !== id),
-        })),
+        set((state) => {
+          const cart = state.cart.filter((p) => p.id !== id)
+          return {
+            cart,
+            cartsByUser: {
+              ...state.cartsByUser,
+              [state.activeUserKey]: cart,
+            },
+          }
+        }),
 
-      clearCart: () => set({ cart: [] }),
+      clearCart: () =>
+        set((state) => ({
+          cart: [],
+          cartsByUser: {
+            ...state.cartsByUser,
+            [state.activeUserKey]: [],
+          },
+        })),
     }),
     {
-      name: 'guest-cart', // localStorage key
+      name: 'cart-store',
       onRehydrateStorage: () => (state) => {
-        state?.setHasHydrated(true)
+        if (!state) return
+        state.setActiveUserKey(state.activeUserKey || 'guest')
+        state.setHasHydrated(true)
       },
     }
   )

@@ -5,6 +5,7 @@ import Login from './pages/auth/login'
 import Cart from './pages/cart'
 import { useEffect } from 'react'
 import { useAuthStore } from './store/useAuthStore'
+import { useCartStore } from './store/useCartStore'
 import SignUpPage from './pages/auth/sign-up'
 import Footer from './components/footer'
 import GuestGuard from './components/guards/guest-guard'
@@ -20,6 +21,7 @@ import AdminUsers from './pages/admin/users'
 
 function App() {
   const { user, setUser, setLoading } = useAuthStore()
+  const setActiveUserKey = useCartStore((state) => state.setActiveUserKey)
   useEffect(() => {
     fetch("http://localhost:5000/api/auth/me", {
       credentials: "include",
@@ -38,7 +40,11 @@ function App() {
         setLoading(false) // 🔑 auth resolved
       })
   }, [])
-  console.log("user", user)
+
+  useEffect(() => {
+    const key = user?.id ? `user-${user.id}` : 'guest'
+    setActiveUserKey(key)
+  }, [setActiveUserKey, user?.id])
 
   return (
     <main className="flex min-h-screen flex-col bg-[#f8f4ef] text-stone-900">

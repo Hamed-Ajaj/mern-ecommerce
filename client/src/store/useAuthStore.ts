@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 type User = {
+  id?: number
   username: string
   email?: string
   role?: string
