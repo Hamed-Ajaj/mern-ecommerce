@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../../../components/ui/button'
 import { Input } from '../../../components/ui/input'
 import { toast } from 'sonner'
+import { createProductSchema } from '../../../schemas/product.schema'
 
 const CreateProduct = () => {
   const navigate = useNavigate()
@@ -12,10 +13,31 @@ const CreateProduct = () => {
     price: '',
     image_url: '',
   })
+  const [errors, setErrors] = useState<{
+    title?: string
+    description?: string
+    price?: string
+    image_url?: string
+  }>({})
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const result = createProductSchema.safeParse(formData)
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      setErrors({
+        title: fieldErrors.title?.[0],
+        description: fieldErrors.description?.[0],
+        price: fieldErrors.price?.[0],
+        image_url: fieldErrors.image_url?.[0],
+      })
+      toast.error('Please fix the highlighted fields')
+      return
+    }
+
+    setErrors({})
     setLoading(true)
 
     try {
@@ -29,13 +51,28 @@ const CreateProduct = () => {
         }),
       })
 
-      const data = await res.json()
+      if (res.status === 401) {
+        toast.error('Please sign in to continue')
+        return
+      }
 
-      if (data.success) {
+      if (res.status === 403) {
+        toast.error('Admin access required')
+        return
+      }
+
+      let data: { success?: boolean; message?: string } | null = null
+      try {
+        data = await res.json()
+      } catch {
+        data = null
+      }
+
+      if (res.ok && data?.success) {
         toast.success('Product created successfully')
         navigate('/admin/products')
       } else {
-        toast.error('Failed to create product')
+        toast.error(data?.message || 'Failed to create product')
       }
     } catch {
       toast.error('An error occurred')
@@ -58,10 +95,18 @@ const CreateProduct = () => {
           <Input
             type="text"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, title: e.target.value })
+              if (errors.title) {
+                setErrors((prev) => ({ ...prev, title: undefined }))
+              }
+            }}
             required
-            className="mt-2 bg-white"
+            className={`mt-2 bg-white ${errors.title ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
           />
+          {errors.title && (
+            <p className="mt-1 text-xs text-red-600">{errors.title}</p>
+          )}
         </div>
 
         <div>
@@ -72,10 +117,18 @@ const CreateProduct = () => {
             type="number"
             step="0.01"
             value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, price: e.target.value })
+              if (errors.price) {
+                setErrors((prev) => ({ ...prev, price: undefined }))
+              }
+            }}
             required
-            className="mt-2 bg-white"
+            className={`mt-2 bg-white ${errors.price ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
           />
+          {errors.price && (
+            <p className="mt-1 text-xs text-red-600">{errors.price}</p>
+          )}
         </div>
 
         <div>
@@ -84,12 +137,18 @@ const CreateProduct = () => {
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) =>
+            onChange={(e) => {
               setFormData({ ...formData, description: e.target.value })
-            }
+              if (errors.description) {
+                setErrors((prev) => ({ ...prev, description: undefined }))
+              }
+            }}
             rows={4}
-            className="mt-2 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
+            className={`mt-2 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 ${errors.description ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-stone-900'}`}
           />
+          {errors.description && (
+            <p className="mt-1 text-xs text-red-600">{errors.description}</p>
+          )}
         </div>
 
         <div>
@@ -99,11 +158,17 @@ const CreateProduct = () => {
           <Input
             type="url"
             value={formData.image_url}
-            onChange={(e) =>
+            onChange={(e) => {
               setFormData({ ...formData, image_url: e.target.value })
-            }
-            className="mt-2 bg-white"
+              if (errors.image_url) {
+                setErrors((prev) => ({ ...prev, image_url: undefined }))
+              }
+            }}
+            className={`mt-2 bg-white ${errors.image_url ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
           />
+          {errors.image_url && (
+            <p className="mt-1 text-xs text-red-600">{errors.image_url}</p>
+          )}
         </div>
 
         <div className="flex gap-4">

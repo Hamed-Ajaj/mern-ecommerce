@@ -49,7 +49,7 @@ function App() {
           <Route path="/sign-up" element={<GuestGuard><SignUpPage /></GuestGuard>} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
-          <Route path="/admin" element={<AdminGuard><AdminLayout /></AdminGuard>}>
+          <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="products/create" element={<CreateProduct />} />

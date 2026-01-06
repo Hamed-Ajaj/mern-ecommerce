@@ -1,6 +1,17 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { Button } from '../../../components/ui/button'
+import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../../../components/ui/alert-dialog'
 
 type Product = {
   id: number
@@ -13,6 +24,8 @@ type Product = {
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   useEffect(() => {
     fetch('http://localhost:5000/api/products')
@@ -26,18 +39,27 @@ const AdminProducts = () => {
   }, [])
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
-
     try {
       const res = await fetch(`http://localhost:5000/api/products/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       })
-      if (res.ok) {
-        setProducts(products.filter((p) => p.id !== id))
+      if (res.status === 401) {
+        toast.error('Please sign in to continue')
+        return
       }
+      if (res.status === 403) {
+        toast.error('Admin access required')
+        return
+      }
+      if (!res.ok) {
+        toast.error('Failed to delete product')
+        return
+      }
+      setProducts((prev) => prev.filter((p) => p.id !== id))
     } catch (error) {
       console.error('Failed to delete product:', error)
+      toast.error('An error occurred while deleting the product')
     }
   }
 
@@ -82,7 +104,10 @@ const AdminProducts = () => {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => handleDelete(product.id)}
+                onClick={() => {
+                  setDeleteTarget(product)
+                  setDeleteOpen(true)
+                }}
               >
                 Delete
               </Button>
@@ -95,6 +120,39 @@ const AdminProducts = () => {
           </div>
         )}
       </div>
+      <AlertDialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          setDeleteOpen(open)
+          if (!open) {
+            setDeleteTarget(null)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete product?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete{' '}
+              {deleteTarget ? `"${deleteTarget.title}"` : 'this product'}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 text-white hover:bg-red-700"
+              onClick={() => {
+                if (deleteTarget) {
+                  handleDelete(deleteTarget.id)
+                }
+                setDeleteOpen(false)
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

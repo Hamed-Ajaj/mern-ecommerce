@@ -1,8 +1,9 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { updateProductSchema } from '@/schemas/product.schema'
 
 const EditProduct = () => {
   const { id } = useParams<{ id: string }>()
@@ -14,6 +15,12 @@ const EditProduct = () => {
     price: '',
     image_url: '',
   })
+  const [errors, setErrors] = useState<{
+    title?: string
+    description?: string
+    price?: string
+    image_url?: string
+  }>({})
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -34,6 +41,21 @@ const EditProduct = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    const result = updateProductSchema.safeParse(formData)
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors
+      setErrors({
+        title: fieldErrors.title?.[0],
+        description: fieldErrors.description?.[0],
+        price: fieldErrors.price?.[0],
+        image_url: fieldErrors.image_url?.[0],
+      })
+      toast.error('Please fix the highlighted fields')
+      return
+    }
+
+    setErrors({})
     setSaving(true)
 
     try {
@@ -46,6 +68,16 @@ const EditProduct = () => {
           price: Number(formData.price),
         }),
       })
+
+      if (res.status === 401) {
+        toast.error('Please sign in to continue')
+        return
+      }
+
+      if (res.status === 403) {
+        toast.error('Admin access required')
+        return
+      }
 
       if (res.ok) {
         toast.success('Product updated successfully')
@@ -78,10 +110,18 @@ const EditProduct = () => {
           <Input
             type="text"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, title: e.target.value })
+              if (errors.title) {
+                setErrors((prev) => ({ ...prev, title: undefined }))
+              }
+            }}
             required
-            className="mt-2 bg-white"
+            className={`mt-2 bg-white ${errors.title ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
           />
+          {errors.title && (
+            <p className="mt-1 text-xs text-red-600">{errors.title}</p>
+          )}
         </div>
 
         <div>
@@ -92,10 +132,18 @@ const EditProduct = () => {
             type="number"
             step="0.01"
             value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            onChange={(e) => {
+              setFormData({ ...formData, price: e.target.value })
+              if (errors.price) {
+                setErrors((prev) => ({ ...prev, price: undefined }))
+              }
+            }}
             required
-            className="mt-2 bg-white"
+            className={`mt-2 bg-white ${errors.price ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
           />
+          {errors.price && (
+            <p className="mt-1 text-xs text-red-600">{errors.price}</p>
+          )}
         </div>
 
         <div>
@@ -104,12 +152,18 @@ const EditProduct = () => {
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) =>
+            onChange={(e) => {
               setFormData({ ...formData, description: e.target.value })
-            }
+              if (errors.description) {
+                setErrors((prev) => ({ ...prev, description: undefined }))
+              }
+            }}
             rows={4}
-            className="mt-2 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900"
+            className={`mt-2 w-full rounded-md border border-black/10 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 ${errors.description ? 'border-red-500 focus-visible:ring-red-500' : 'focus-visible:ring-stone-900'}`}
           />
+          {errors.description && (
+            <p className="mt-1 text-xs text-red-600">{errors.description}</p>
+          )}
         </div>
 
         <div>
@@ -119,11 +173,17 @@ const EditProduct = () => {
           <Input
             type="url"
             value={formData.image_url}
-            onChange={(e) =>
+            onChange={(e) => {
               setFormData({ ...formData, image_url: e.target.value })
-            }
-            className="mt-2 bg-white"
+              if (errors.image_url) {
+                setErrors((prev) => ({ ...prev, image_url: undefined }))
+              }
+            }}
+            className={`mt-2 bg-white ${errors.image_url ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
           />
+          {errors.image_url && (
+            <p className="mt-1 text-xs text-red-600">{errors.image_url}</p>
+          )}
         </div>
 
         <div className="flex gap-4">
