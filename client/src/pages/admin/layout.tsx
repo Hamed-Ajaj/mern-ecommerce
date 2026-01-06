@@ -52,17 +52,6 @@ const AdminLayout = () => {
             Create Product
           </Link>
           <Link
-            to="/admin/orders"
-            className={cn(
-              'block rounded-lg px-4 py-2 text-sm font-medium transition',
-              isActive('/admin/orders')
-                ? 'bg-stone-900 text-white'
-                : 'text-stone-600 hover:bg-stone-100'
-            )}
-          >
-            Orders
-          </Link>
-          <Link
             to="/admin/users"
             className={cn(
               'block rounded-lg px-4 py-2 text-sm font-medium transition',

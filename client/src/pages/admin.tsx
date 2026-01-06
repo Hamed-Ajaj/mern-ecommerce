@@ -14,9 +14,15 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const [productsRes, ordersRes, usersRes] = await Promise.all([
-          fetch('http://localhost:5000/api/products'),
-          fetch('http://localhost:5000/api/orders'),
-          fetch('http://localhost:5000/api/users'),
+          fetch('http://localhost:5000/api/products', {
+            credentials: 'include',
+          }),
+          fetch('http://localhost:5000/api/orders', {
+            credentials: 'include',
+          }),
+          fetch('http://localhost:5000/api/users', {
+            credentials: 'include',
+          }),
         ])
 
         const productsData = await productsRes.json()
