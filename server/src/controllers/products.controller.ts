@@ -13,7 +13,7 @@ export const allProductsController = async (req: Request, res: Response) => {
     const params: any[] = []
 
     if (search) {
-      sql += " WHERE name LIKE ? OR description LIKE ?"
+      sql += " WHERE title LIKE ? OR description LIKE ?"
       params.push(`%${search}%`, `%${search}%`)
     }
 
