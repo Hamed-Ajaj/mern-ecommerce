@@ -5,14 +5,20 @@ import ProductCard from '@/components/product-card'
 import Loading from '@/components/loading'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const searchParam = searchParams.get('search') ?? ''
-  const orderParam = searchParams.get('order') ?? ''
-  const sortParam = searchParams.get('sort') ?? ''
-  console.log(orderParam, sortParam)
+  const orderParam = searchParams.get('order') ?? 'desc'
+  const sortParam = searchParams.get('sort') ?? 'newest'
   const [searchValue, setSearchValue] = useState(searchParam)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
@@ -21,10 +27,18 @@ const Products = () => {
     setSearchValue(searchParam)
   }, [searchParam])
 
-  const fetchProducts = async (search: string) => {
+  const fetchProducts = async (
+    search: string,
+    sort: string,
+    order: string
+  ) => {
     try {
       setLoading(true)
-      const query = search ? `?search=${encodeURIComponent(search)}` : ''
+      const params = new URLSearchParams()
+      if (search) params.set('search', search)
+      if (sort) params.set('sort', sort)
+      if (order) params.set('order', order)
+      const query = params.toString() ? `?${params.toString()}` : ''
       const res = await fetch(`http://localhost:5000/api/products${query}`)
       const data = await res.json()
       if (res.ok) {
@@ -39,13 +53,42 @@ const Products = () => {
   }
 
   useEffect(() => {
-    fetchProducts(searchParam)
-  }, [searchParam])
+    fetchProducts(searchParam, sortParam, orderParam)
+  }, [searchParam, sortParam, orderParam])
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const next = searchValue.trim()
-    setSearchParams(next ? { search: next } : {})
+    const params: Record<string, string> = {
+      sort: sortParam,
+      order: orderParam,
+    }
+    if (next) {
+      params.search = next
+    }
+    setSearchParams(params)
+  }
+
+  const handleSortChange = (value: string) => {
+    const params: Record<string, string> = {
+      sort: value,
+      order: orderParam,
+    }
+    if (searchParam) {
+      params.search = searchParam
+    }
+    setSearchParams(params)
+  }
+
+  const handleOrderChange = (value: string) => {
+    const params: Record<string, string> = {
+      sort: sortParam,
+      order: value,
+    }
+    if (searchParam) {
+      params.search = searchParam
+    }
+    setSearchParams(params)
   }
 
   return (
@@ -67,6 +110,26 @@ const Products = () => {
           <div className="flex flex-col gap-3 sm:items-end">
             <div className="rounded-full border border-black/10 bg-white px-5 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
               Limited drop
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Select value={sortParam} onValueChange={handleSortChange}>
+                <SelectTrigger className="h-9 w-[160px] rounded-full border-black/10 bg-white text-xs uppercase tracking-[0.2em] text-stone-600">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="price">Price</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={orderParam} onValueChange={handleOrderChange}>
+                <SelectTrigger className="h-9 w-[140px] rounded-full border-black/10 bg-white text-xs uppercase tracking-[0.2em] text-stone-600">
+                  <SelectValue placeholder="Order" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Descending</SelectItem>
+                  <SelectItem value="asc">Ascending</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <form
               onSubmit={handleSearchSubmit}
